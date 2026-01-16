@@ -203,12 +203,12 @@ export function compactGroundingPacket(packet: GroundingPacket): string {
   return JSON.stringify(compact);
 }
 
-function summarizeZones(zones: typeof GameStateSchema._type['you']) {
+function summarizeZones(zones: GameState['you']) {
   return {
-    board: zones.battlefield.map(p => ('name' in p ? p.name : p.name)),
+    board: zones.battlefield.map((p: { name: string }) => p.name),
     hand: Array.isArray(zones.hand)
-      ? zones.hand.map(c => c.name)
-      : { count: zones.hand.count, known: zones.hand.known?.map(c => c.name) },
-    grave: zones.graveyard.map(c => c.name),
+      ? zones.hand.map((c: { name: string }) => c.name)
+      : { count: zones.hand.count, known: zones.hand.known?.map((c: { name: string }) => c.name) },
+    grave: zones.graveyard.map((c: { name: string }) => c.name),
   };
 }

@@ -3,7 +3,8 @@
 import { useState, useCallback } from 'react';
 import type { GameState } from '@/lib/schemas/game-state';
 
-const EXAMPLE_STATE: Partial<GameState> = {
+// Example state uses a simpler format - the actual schema has defaults
+const EXAMPLE_STATE = {
   turn: 5,
   phase: 'precombat_main',
   priority: 'you',
@@ -12,8 +13,8 @@ const EXAMPLE_STATE: Partial<GameState> = {
   manaPool: { W: 0, U: 0, B: 0, R: 2, G: 0, C: 0 },
   you: {
     battlefield: [
-      { name: 'Mountain', tapped: true },
-      { name: 'Mountain', tapped: false },
+      { name: 'Mountain', tapped: true, summoningSick: false },
+      { name: 'Mountain', tapped: false, summoningSick: false },
       { name: 'Monastery Swiftspear', tapped: false, summoningSick: false },
     ],
     hand: [
@@ -25,16 +26,16 @@ const EXAMPLE_STATE: Partial<GameState> = {
   },
   opponent: {
     battlefield: [
-      { name: 'Snapcaster Mage', tapped: false },
-      { name: 'Island', tapped: false },
-      { name: 'Island', tapped: false },
+      { name: 'Snapcaster Mage', tapped: false, summoningSick: false },
+      { name: 'Island', tapped: false, summoningSick: false },
+      { name: 'Island', tapped: false, summoningSick: false },
     ],
     hand: { count: 4 },
     graveyard: [{ name: 'Counterspell' }],
     exile: [],
   },
   stack: [],
-};
+} as const;
 
 interface GameStateEditorProps {
   value: string;

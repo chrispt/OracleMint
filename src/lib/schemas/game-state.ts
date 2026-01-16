@@ -296,6 +296,13 @@ export function parseManaString(manaStr: string): ManaPool {
 export function quickEntryToGameState(quick: QuickEntry): Partial<GameState> {
   const phase = expandSimplifiedPhase(quick.phase);
 
+  // Helper to create a permanent with required fields
+  const toPermanent = (name: string): Permanent => ({
+    name,
+    tapped: false,
+    summoningSick: false,
+  });
+
   return {
     turn: quick.turn,
     phase,
@@ -307,13 +314,13 @@ export function quickEntryToGameState(quick: QuickEntry): Partial<GameState> {
     },
     manaPool: quick.availableMana ? parseManaString(quick.availableMana) : undefined,
     you: {
-      battlefield: quick.yourBattlefield.map(name => ({ name })),
+      battlefield: quick.yourBattlefield.map(toPermanent),
       hand: quick.yourHand.map(name => ({ name })),
       graveyard: quick.yourGraveyard.map(name => ({ name })),
       exile: [],
     },
     opponent: {
-      battlefield: quick.opponentBattlefield.map(name => ({ name })),
+      battlefield: quick.opponentBattlefield.map(toPermanent),
       hand: { count: quick.opponentHandCount },
       graveyard: quick.opponentGraveyard.map(name => ({ name })),
       exile: [],

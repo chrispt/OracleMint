@@ -220,8 +220,8 @@ async function callWithRetry<T>(
           { role: 'user', content: userPrompt },
         ],
         response_format: {
-          type: 'json_schema',
-          json_schema: jsonSchema as OpenAI.ResponseFormatJSONSchema.JSONSchema,
+          type: 'json_schema' as const,
+          json_schema: jsonSchema as { name: string; description?: string; schema?: Record<string, unknown>; strict?: boolean },
         },
         temperature: 0.1, // Low temperature for consistent outputs
       });
