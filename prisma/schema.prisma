@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============ CARD DATA ============
+
+model Card {
+  id              String    @id @default(cuid())
+  oracleId        String    @unique @map("oracle_id")
+  name            String
+  normalizedName  String    @map("normalized_name")
+  layout          String
+  manaCost        String?   @map("mana_cost")
+  cmc             Float
+  typeLine        String    @map("type_line")
+  oracleText      String?   @map("oracle_text")
+  colors          String[]
+  colorIdentity   String[]  @map("color_identity")
+  keywords        String[]
+
+  // Metadata
+  scryfallId      String    @unique @map("scryfall_id")
+  releasedAt      DateTime? @map("released_at")
+
+  // Relations
+  faces           CardFace[]
+  rulings         Ruling[]
+
+  // Timestamps
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([normalizedName])
+  @@index([name])
+  @@map("cards")
+}
+
+model CardFace {
+  id              String   @id @default(cuid())
+  cardId          String   @map("card_id")
+  card            Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  faceIndex       Int      @map("face_index")
+  name            String
+  normalizedName  String   @map("normalized_name")
+  manaCost        String?  @map("mana_cost")
+  typeLine        String   @map("type_line")
+  oracleText      String?  @map("oracle_text")
+  power           String?
+  toughness       String?
+  loyalty         String?
+  defense         String?
+
+  @@unique([cardId, faceIndex])
+  @@index([normalizedName])
+  @@map("card_faces")
+}
+
+model Ruling {
+  id          String   @id @default(cuid())
+  oracleId    String   @map("oracle_id")
+  card        Card     @relation(fields: [oracleId], references: [oracleId], onDelete: Cascade)
+
+  publishedAt DateTime @map("published_at")
+  comment     String   @db.Text
+  source      String
+
+  @@index([oracleId])
+  @@map("rulings")
+}
+
+// ============ SYNC TRACKING ============
+
+model SyncRun {
+  id            String     @id @default(cuid())
+  type          String
+  status        SyncStatus @default(PENDING)
+
+  // Progress tracking
+  totalRecords  Int?       @map("total_records")
+  processed     Int        @default(0)
+  failed        Int        @default(0)
+  lastOracleId  String?    @map("last_oracle_id")
+
+  // Blob staging
+  blobUrl       String?    @map("blob_url")
+  blobSize      Int?       @map("blob_size")
+
+  // Timing
+  startedAt     DateTime   @default(now()) @map("started_at")
+  completedAt   DateTime?  @map("completed_at")
+
+  // Error tracking
+  errorMessage  String?    @map("error_message") @db.Text
+
+  @@map("sync_runs")
+}
+
+enum SyncStatus {
+  PENDING
+  DOWNLOADING
+  PROCESSING
+  COMPLETED
+  FAILED
+  PAUSED
+}
+
+// ============ TOKENS/EMBLEMS ============
+
+model Token {
+  id              String   @id @default(cuid())
+  scryfallId      String   @unique @map("scryfall_id")
+  name            String
+  normalizedName  String   @map("normalized_name")
+  typeLine        String   @map("type_line")
+  oracleText      String?  @map("oracle_text")
+  power           String?
+  toughness       String?
+  colors          String[]
+  keywords        String[]
+
+  // What creates this token
+  createdBy       String[] @map("created_by")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([normalizedName])
+  @@map("tokens")
+}
